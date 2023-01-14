@@ -15,24 +15,24 @@ openai.api_key=env["OPENAI_API_KEY"]
 
 @bot.message_handler(commands=['start', 'hello'])
 def handle_command(message):
-    bot.reply_to(message, "Hello, welcome to McDermott Group's Bot!")
+    bot.reply_to(message, "Hello, welcome to the McDermott Bot!")
 
 @bot.message_handler(commands=['define'])
 def handle_command(message):
     global state
     if (state == "default"):
-        bot.reply_to(message, "You are already in definition state!")
+        bot.reply_to(message, "You are already in define mode!")
     else:
-        bot.reply_to(message, "Send a word to receive its definition!")
+        bot.reply_to(message, "You are now in define mode! Send a word to receive its definition!")
         state = "default"
 
 @bot.message_handler(commands=['play'])
 def handle_command(message):
     global state
     if (state == "play"):
-        bot.reply_to(message, "You are already in play state!")
+        bot.reply_to(message, "You are already in game mode!")
     else:
-        bot.reply_to(message, "Guess the word given its definition!")
+        bot.reply_to(message, "You are in game mode! Guess the word given its definition!")
         state = "play"
 
 @bot.message_handler(func=lambda message: True)
