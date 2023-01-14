@@ -1,15 +1,16 @@
 import telegram
 import telegram.ext
-# import queue
+import string
 import re
 import openai
 
 from os import environ as env
 from dotenv import load_dotenv
 
+load_dotenv()
 # The API Key we received for our bot
-API_KEY = "5634663497:AAF4Xih_61qN1KxsdhrtrgqOZOquETBy8mE"
-openai.api_key = "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"
+API_KEY =env["BOT_API_KEY"]
+openai.api_key=env["OPENAI_API_KEY"]
 # update_queue = queue.Queue()
 # Create an updater object with our API Key
 updater = telegram.ext.Updater(API_KEY)
@@ -46,7 +47,7 @@ def randomize_word(update_obj, context):
     
     # store the answer in the context
     context.user_data['answer'] = response["choices"][0]["text"].strip()
-    # context.user_data['answer'] = context.user_data['answer'].translate()
+    context.user_data['answer'] = context.user_data['answer'].translate(str.maketrans('','', string.punctuation))
     context.user_data['answer'] = context.user_data['answer'].lower()
     update_obj.message.reply_text(f'''Answer: {response["choices"][0]["text"]} \n''')
     print(f'''Answer: {response["choices"][0]["text"]} \n''')
