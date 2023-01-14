@@ -58,7 +58,6 @@ def randomize_word(update_obj, context):
     update_obj.message.reply_text(f'''{response2["choices"][0]["text"]} \n''')    
 
 def category(update_obj, context):
-    
     context.user_data['category'] = update_obj.message.text
     if (context.user_data['category'].lower() != 'all'):
         context.user_data['prompt'] += "Use only knowledge in the " + context.user_data['category'].lower() + " field."
@@ -92,10 +91,7 @@ def define(update_obj, context):
 def welcome(update_obj, context):
     if update_obj.message.text.lower() == 'play':
         # send question, and go to the PLAY state
-        update_obj.message.reply_text("Going to PLAY state")
         randomize_word(update_obj, context)
-        update_obj.message.reply_text("Random word generated")
-        # context.user_data['index'] = random.randint(0,99)
         return PLAY
     else:
         update_obj.message.reply_text("Send me a word!")
@@ -123,17 +119,14 @@ def correct(update_obj, context):
     print("3")
     if update_obj.message.text.lower() in ['yes', 'y']:
         update_obj.message.reply_text("Send /start to play again.")
-        print("1")
         return telegram.ext.ConversationHandler.END
     else:
-        print("2")
         first_name = update_obj.message.from_user['first_name']
         update_obj.message.reply_text(f"See you {first_name}, bye!")
         return telegram.ext.ConversationHandler.END
 
 def cancel(update_obj, context):
     # get the user's first name
-    print("5")
     first_name = update_obj.message.from_user['first_name']
     update_obj.message.reply_text(f"See you {first_name}, bye!")
     return telegram.ext.ConversationHandler.END
