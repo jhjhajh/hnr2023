@@ -24,7 +24,7 @@ DEFINE = 1
 PLAY = 2
 CANCEL = 3
 CORRECT = 4
-RESTART = 5
+CATEGORY = 5
 
 # The entry function
 def start(update_obj, context):
@@ -38,6 +38,7 @@ def start(update_obj, context):
 
 # helper function, generates new numbers and sends the question
 def randomize_word(update_obj, context):
+    print(context)
     print(config.index)
     print(" " + config.words[config.index])
     prompt_message2 = "explain " + config.words[config.index] + " in a fun and weird but short way without mentioning the word" + config.words[config.index] + " Do not explicitly mention words related to " + config.words[config.index]
@@ -55,15 +56,14 @@ def randomize_word(update_obj, context):
     # send the question
     update_obj.message.reply_text(f'''{response2["choices"][0]["text"]} \n''')    
 
-# helper function, generates new numbers and sends the question
-def define(update_obj, context):
-    context.user_data['word'] = update_obj.message.text.translate(str.maketrans('','', string.punctuation)).lower()
-    prompt_message = "explain " + context.user_data['word'] + " in a fun and weird but short way without mentioning the word" + context.user_data['word'] + " Do not explicitly mention words related to " + context.user_data['word']
-    context.user_data['prompt'] = prompt_message
-
+def category(update_obj, context):
+    
+    context.user_data['category'] = update_obj.message.text
+    if (context.user_data['category'].lower() != 'all'):
+        context.user_data['prompt'] += "Use only knowledge in the " + context.user_data['category'].lower() + " field."
     response = openai.Completion.create(
     engine="text-davinci-003",
-    prompt='"""\n{}\n"""'.format(prompt_message),
+    prompt='"""\n{}\n"""'.format(context.user_data['prompt']),
     temperature=0,
     max_tokens=1200,
     top_p=1,
@@ -75,6 +75,17 @@ def define(update_obj, context):
     update_obj.message.reply_text(f'''{response["choices"][0]["text"]}''')
     update_obj.message.reply_text("Play another game?", reply_markup=telegram.ReplyKeyboardMarkup([['yes', 'no']], one_time_keyboard=True))
     return CORRECT
+
+# helper function, generates new numbers and sends the question
+def define(update_obj, context):
+    context.user_data['word'] = update_obj.message.text.translate(str.maketrans('','', string.punctuation)).lower()
+    prompt_message = "explain " + context.user_data['word'] + " in a fun and weird but short way without mentioning the word" + context.user_data['word'] + " Do not explicitly mention words related to " + context.user_data['word']
+    context.user_data['prompt'] = prompt_message
+    update_obj.message.reply_text("Choose a category to receive the definition of your word in!",
+    reply_markup=telegram.ReplyKeyboardMarkup([['All', 'Literature', 'History', 'Geography', 'Astronomy', 'Math', 'Art', 'Music', 'Science', 'Movies', 'Society']], one_time_keyboard=True)
+    )
+    return CATEGORY
+
 
 # in the WELCOME state, check if the user wants to answer a question
 def welcome(update_obj, context):
@@ -91,7 +102,6 @@ def welcome(update_obj, context):
 
 # in the PLAY state
 def play(update_obj, context):
-    config.index = random.randint(0,99)
     # expected solution
     # check if the solution was correct
     if (config.words[config.index] == update_obj.message.text.lower()):
@@ -99,6 +109,7 @@ def play(update_obj, context):
         update_obj.message.reply_text("Correct answer!")
         update_obj.message.reply_text("Play another game?", reply_markup=telegram.ReplyKeyboardMarkup([['yes', 'no']], one_time_keyboard=True))
         print("4")
+        config.index = random.randint(0,99)
         return CORRECT
     else:
         # wrong answer, reply, try again
@@ -139,12 +150,14 @@ def cancel(update_obj, context):
 # a regular expression that matches yes or no
 define_play_regex = re.compile(r'^(Define|Play)$', re.IGNORECASE)
 yes_no_regex = re.compile(r'^(yes|no|y|n)$', re.IGNORECASE)
+category_regex = re.compile(r'^(all|literature|history|geography|astronomy|math|art|music|science|movies|society)$', re.IGNORECASE)
 # Create our ConversationHandler, with only one state
 handler = telegram.ext.ConversationHandler(
       entry_points=[telegram.ext.CommandHandler('start', start)],
       states={
             WELCOME: [telegram.ext.MessageHandler(telegram.ext.Filters.regex(define_play_regex), welcome)],
             DEFINE: [telegram.ext.MessageHandler(telegram.ext.Filters.text, define)],
+            CATEGORY: [telegram.ext.MessageHandler(telegram.ext.Filters.regex(category_regex), category)],
             PLAY: [telegram.ext.MessageHandler(telegram.ext.Filters.text, play)],
             CANCEL: [telegram.ext.MessageHandler(telegram.ext.Filters.regex(yes_no_regex), cancel)],
             # RESTART: [telegram.ext.MessageHandler(telegram.ext.Filters.all, restart)],
