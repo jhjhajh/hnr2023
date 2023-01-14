@@ -3,7 +3,6 @@ import telegram.ext
 import string
 import re
 import openai
-import os 
 import config
 import random
 
@@ -91,6 +90,7 @@ def welcome(update_obj, context):
 
 # in the PLAY state
 def play(update_obj, context):
+    config.index = random.randint(0,99)
     # expected solution
     # check if the solution was correct
     if (config.words[config.index] == update_obj.message.text.lower()):
