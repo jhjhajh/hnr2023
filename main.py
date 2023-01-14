@@ -36,7 +36,7 @@ def handle_command(message):
         state = "play"
 
 @bot.message_handler(func=lambda message: True)
-def get_definition(message):
+def get_word(message):
     if (state == "default"):
         prompt_message = "explain fun " + message.text + " in a fun and weird but short way without mentioning the word" + message.text + " Do not explicitly mention words related to " + message.text
 
@@ -54,6 +54,28 @@ def get_definition(message):
         f'```python\n{response["choices"][0]["text"]}\n```',
         parse_mode="Markdown")
     else:
-        bot.reply_to(message, "not default mode")
+        bot.reply_to(message, "You're not in default mode!")
+
+@bot.message_handler(func=lambda message: True)
+def play_game(message):
+    if (state == "play"):
+        prompt_message = "explain fun " + message.text + " in a fun and weird but short way without mentioning the word" + message.text + " Do not explicitly mention words related to " + message.text
+
+        response = openai.Completion.create(
+            engine="text-davinci-003",
+            prompt='"""\n{}\n"""'.format(prompt_message),
+            temperature=0,
+            max_tokens=1200,
+            top_p=1,
+            frequency_penalty=0,
+            presence_penalty=0,
+            stop=['"""'])
+
+        bot.send_message(message.chat.id,
+        f'```python\n{response["choices"][0]["text"]}\n```',
+        parse_mode="Markdown")
+    else:
+        bot.reply_to(message, "You're not in play mode")
+
 
 bot.infinity_polling()
