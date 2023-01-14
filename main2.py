@@ -59,11 +59,12 @@ def randomize_word(update_obj, context):
 # helper function, generates new numbers and sends the question
 def define(update_obj, context):
     context.user_data['word'] = update_obj.message.text.translate(str.maketrans('','', string.punctuation)).lower()
-    prompt_message2 = "explain " + context.user_data['word'] + " in a fun and weird but short way without mentioning the word" + context.user_data['word'] + " Do not explicitly mention words related to " + context.user_data['word']
+    prompt_message = "explain " + context.user_data['word'] + " in a fun and weird but short way without mentioning the word" + context.user_data['word'] + " Do not explicitly mention words related to " + context.user_data['word']
+    context.user_data['prompt'] = prompt_message
 
-    response2 = openai.Completion.create(
+    response = openai.Completion.create(
     engine="text-davinci-003",
-    prompt='"""\n{}\n"""'.format(prompt_message2),
+    prompt='"""\n{}\n"""'.format(prompt_message),
     temperature=0,
     max_tokens=1200,
     top_p=1,
@@ -72,7 +73,7 @@ def define(update_obj, context):
     stop=['"""'])
     
     # send the definition
-    update_obj.message.reply_text(f'''{response2["choices"][0]["text"]}''')
+    update_obj.message.reply_text(f'''{response["choices"][0]["text"]}''')
     update_obj.message.reply_text("Play another game?", reply_markup=telegram.ReplyKeyboardMarkup([['yes', 'no']], one_time_keyboard=True))
     return CORRECT
 
@@ -115,13 +116,17 @@ def correct(update_obj, context):
         return telegram.ext.ConversationHandler.END
     else:
         print("2")
-        return CANCEL
+        first_name = update_obj.message.from_user['first_name']
+        update_obj.message.reply_text(f"See you {first_name}, bye!")
+        return telegram.ext.ConversationHandler.END
 
 def cancel(update_obj, context):
     # get the user's first name
+    print("5")
     first_name = update_obj.message.from_user['first_name']
     update_obj.message.reply_text(f"See you {first_name}, bye!")
     return telegram.ext.ConversationHandler.END
+    
 
 # a regular expression that matches yes or no
 define_play_regex = re.compile(r'^(Define|Play)$', re.IGNORECASE)
