@@ -12,6 +12,18 @@ load_dotenv()
 bot = telebot.TeleBot(token=env["BOT_API_KEY"])
 openai.api_key=env["OPENAI_API_KEY"]
 
+@bot.message_handler(commands=['start'])
+def handle_command(message):
+    bot.reply_to(message, "Hello, welcome to McDermott Group's Bot!")
+
+@bot.message_handler(commands=['define'])
+def handle_command(message):
+    bot.reply_to(message, "Send a word to receive its definition!")
+
+@bot.message_handler(commands=['play'])
+def handle_command(message):
+    bot.reply_to(message, "Guess the word given its definition!")
+
 @bot.message_handler(func=lambda message: True)
 def get_response(message):
     
