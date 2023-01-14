@@ -30,29 +30,10 @@ RESTART = 5
 # The entry function
 def start(update_obj, context):
 
-            # send the question, and show the keyboard markup (suggested answers)
+    # send the question, and show the keyboard markup (suggested answers)
     update_obj.message.reply_text("Hello, welcome to McDermott Group's Bot! Choose a mode to start (Define/Play)",
     reply_markup=telegram.ReplyKeyboardMarkup([['Define', 'Play']], one_time_keyboard=True)
     )
-
-    # # populate words array from config file
-    # try:
-    #     if os.path.isfile('data.txt'):
-    #         with open('data.txt', 'r') as f:
-    #             tempFile = f.read()
-    #             tempFile = tempFile.splitlines()
-    #             x = 0
-    #             while x < len(tempFile):
-    #                 config.words += [tempFile[x]]
-    #                 x+=1
-    #     for word in config.words:
-    #         print(word)
-    # except Exception as e:
-    #     first_name = update_obj.message.from_user['first_name']
-    #     print("unable to read file. check the format of data file")
-    #     print (e.msg)
-    #     update_obj.message.reply_text(f"Unable to load bot. See you {first_name}!, bye")
-
     # go to the WELCOME state
     return WELCOME
 
