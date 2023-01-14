@@ -38,9 +38,10 @@ def start(update_obj, context):
 
 # helper function, generates new numbers and sends the question
 def randomize_word(update_obj, context):
-    print(config.index)
-    print(" " + config.words[config.index])
-    prompt_message2 = "explain " + config.words[config.index] + " in a fun and weird but short way without mentioning the word" + config.words[config.index] + " Do not explicitly mention words related to " + config.words[config.index]
+    context.user_data['index'] = random.randint(0,99)
+    print(context.user_data['index'])
+    print(" " + config.words[context.user_data['index']])
+    prompt_message2 = "explain " + config.words[context.user_data['index']] + " in a fun and weird but short way without mentioning the word" + config.words[context.user_data['index']] + " Do not explicitly mention words related to " + config.words[context.user_data['index']]
 
     response2 = openai.Completion.create(
     engine="text-davinci-003",
@@ -83,6 +84,7 @@ def welcome(update_obj, context):
         update_obj.message.reply_text("Going to PLAY state")
         randomize_word(update_obj, context)
         update_obj.message.reply_text("Random word generated")
+        # context.user_data['index'] = random.randint(0,99)
         return PLAY
     else:
         update_obj.message.reply_text("Send me a word!")
@@ -91,10 +93,10 @@ def welcome(update_obj, context):
 
 # in the PLAY state
 def play(update_obj, context):
-    config.index = random.randint(0,99)
+
     # expected solution
     # check if the solution was correct
-    if (config.words[config.index] == update_obj.message.text.lower()):
+    if (config.words[context.user_data['index']] == update_obj.message.text.lower()):
         # correct answer, ask the user if he found tutorial helpful, and go to the CORRECT state
         update_obj.message.reply_text("Correct answer!")
         update_obj.message.reply_text("Play another game?", reply_markup=telegram.ReplyKeyboardMarkup([['yes', 'no']], one_time_keyboard=True))
@@ -104,11 +106,6 @@ def play(update_obj, context):
         # wrong answer, reply, try again
         update_obj.message.reply_text("Wrong answer... Try again!")
         return PLAY
-
-# # in the DEFINE state
-# def define(update_obj, context):
-#     get_definition(update_obj, context)
-#     return CORRECT
     
 # in the CORRECT state
 def correct(update_obj, context):
@@ -130,11 +127,6 @@ def cancel(update_obj, context):
     update_obj.message.reply_text(f"See you {first_name}, bye!")
     return telegram.ext.ConversationHandler.END
     
-
-# def restart(update_obj, context):
-#     update_obj.message.reply_text("Entered restart stage.")
-#     update_obj.message.reply_text("Send /start to play again.")
-#     return telegram.ext.ConversationHandler.END
 
 # a regular expression that matches yes or no
 define_play_regex = re.compile(r'^(Define|Play)$', re.IGNORECASE)
