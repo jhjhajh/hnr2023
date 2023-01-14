@@ -58,7 +58,6 @@ def randomize_word(update_obj, context):
     update_obj.message.reply_text(f'''{response2["choices"][0]["text"]} \n''')    
 
 def category(update_obj, context):
-    
     context.user_data['category'] = update_obj.message.text
     if (context.user_data['category'].lower() != 'all'):
         context.user_data['prompt'] += "Use only knowledge in the " + context.user_data['category'].lower() + " field."
