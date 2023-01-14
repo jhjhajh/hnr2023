@@ -92,10 +92,7 @@ def define(update_obj, context):
 def welcome(update_obj, context):
     if update_obj.message.text.lower() == 'play':
         # send question, and go to the PLAY state
-        update_obj.message.reply_text("Going to PLAY state")
         randomize_word(update_obj, context)
-        update_obj.message.reply_text("Random word generated")
-        # context.user_data['index'] = random.randint(0,99)
         return PLAY
     else:
         update_obj.message.reply_text("Send me a word!")
@@ -104,15 +101,17 @@ def welcome(update_obj, context):
 
 # in the PLAY state
 def play(update_obj, context):
+    # if update_obj.message.text.lower() == 'cancel':
+    #     return CANCEL
     # expected solution
     # check if the solution was correct
     if (config.words[context.user_data['index']] == update_obj.message.text.lower()):
         # correct answer, ask the user if he found tutorial helpful, and go to the CORRECT state
         update_obj.message.reply_text("Correct answer!")
         update_obj.message.reply_text("Play another game?", reply_markup=telegram.ReplyKeyboardMarkup([['yes', 'no']], one_time_keyboard=True))
-        print("4")
-        config.index = random.randint(0,99)
         return CORRECT
+    elif (update_obj.message.text.lower() == '/cancel'):
+        return CANCEL
     else:
         # wrong answer, reply, try again
         update_obj.message.reply_text("Wrong answer... Try again!")
@@ -120,20 +119,16 @@ def play(update_obj, context):
     
 # in the CORRECT state
 def correct(update_obj, context):
-    print("3")
     if update_obj.message.text.lower() in ['yes', 'y']:
         update_obj.message.reply_text("Send /start to play again.")
-        print("1")
         return telegram.ext.ConversationHandler.END
     else:
-        print("2")
         first_name = update_obj.message.from_user['first_name']
         update_obj.message.reply_text(f"See you {first_name}, bye!")
         return telegram.ext.ConversationHandler.END
 
 def cancel(update_obj, context):
     # get the user's first name
-    print("5")
     first_name = update_obj.message.from_user['first_name']
     update_obj.message.reply_text(f"See you {first_name}, bye!")
     return telegram.ext.ConversationHandler.END
