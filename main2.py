@@ -100,17 +100,16 @@ def welcome(update_obj, context):
 
 # in the PLAY state
 def play(update_obj, context):
-    # if update_obj.message.text.lower() == 'cancel':
-    #     return CANCEL
-    # expected solution
     # check if the solution was correct
-    if (config.words[context.user_data['index']] == update_obj.message.text.lower()):
+    if (update_obj.message.text.lower() == '/cancel'):
+        update_obj.message.reply_text("Are you sure you want to end the game?", reply_markup=telegram.ReplyKeyboardMarkup([['yes', 'no']], one_time_keyboard=True))
+        print("cancel")
+        return CANCEL
+    elif (config.words[context.user_data['index']] == update_obj.message.text.lower()):
         # correct answer, ask the user if he found tutorial helpful, and go to the CORRECT state
         update_obj.message.reply_text("Correct answer!")
         update_obj.message.reply_text("Play another game?", reply_markup=telegram.ReplyKeyboardMarkup([['yes', 'no']], one_time_keyboard=True))
         return CORRECT
-    elif (update_obj.message.text.lower() == '/cancel'):
-        return CANCEL
     else:
         # wrong answer, reply, try again
         update_obj.message.reply_text("Wrong answer... Try again!")
@@ -127,6 +126,7 @@ def correct(update_obj, context):
         return telegram.ext.ConversationHandler.END
 
 def cancel(update_obj, context):
+    print("inside cancel func")
     # get the user's first name
     first_name = update_obj.message.from_user['first_name']
     update_obj.message.reply_text(f"See you {first_name}, bye!")
