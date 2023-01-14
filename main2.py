@@ -3,6 +3,9 @@ import telegram.ext
 import string
 import re
 import openai
+import os 
+import config
+import random
 
 from os import environ as env
 from dotenv import load_dotenv
@@ -25,35 +28,40 @@ CORRECT = 4
 
 # The entry function
 def start(update_obj, context):
-    # send the question, and show the keyboard markup (suggested answers)
-    update_obj.message.reply_text("Hello, welcome to McDermott Group's Bot! Choose a mode to start (Define/Play)",
+
+    # populate words array from config file
+    try:
+         # send the question, and show the keyboard markup (suggested answers)
+        update_obj.message.reply_text("Hello, welcome to McDermott Group's Bot! Choose a mode to start (Define/Play)",
         reply_markup=telegram.ReplyKeyboardMarkup([['Define', 'Play']], one_time_keyboard=True)
-    )
+        )
+
+        if os.path.isfile('data.txt'):
+            with open('data.txt', 'r') as f:
+                tempFile = f.read()
+                tempFile = tempFile.splitlines()
+                x = 0
+                while x < len(tempFile):
+                    config.words += [tempFile[x]]
+                    x+=1
+        for word in config.words:
+            print(word)
+    except Exception as e:
+        first_name = update_obj.message.from_user['first_name']
+        print("unable to read file. check the format of data file")
+        print (e.msg)
+        update_obj.message.reply_text(f"Unable to load bot. See you {first_name}!, bye")
+
     # go to the WELCOME state
     return WELCOME
 
 # helper function, generates new numbers and sends the question
 def randomize_word(update_obj, context):
-    prompt_message = "generate a commonly-used non-article word, do not give me a code or a sentence"
-    response = openai.Completion.create(
-    engine="text-davinci-003",
-    prompt='"""\n{}\n"""'.format(prompt_message),
-    temperature=0,
-    max_tokens=1200,
-    top_p=1,
-    frequency_penalty=0,
-    presence_penalty=0,
-    stop=['"""'])
     
-    # store the answer in the context
-    context.user_data['answer'] = response["choices"][0]["text"].strip()
-    context.user_data['answer'] = context.user_data['answer'].translate(str.maketrans('','', string.punctuation))
-    context.user_data['answer'] = context.user_data['answer'].lower()
-    update_obj.message.reply_text(f'''Answer: {response["choices"][0]["text"]} \n''')
-    print(f'''Answer: {response["choices"][0]["text"]} \n''')
-    print(context.user_data['answer'])
-    
-    prompt_message2 = "explain " + context.user_data['answer'] + " in a fun and weird but short way without mentioning the word" + context.user_data['answer'] + " Do not explicitly mention words related to " + context.user_data['answer']
+    # generate random number as index
+    index = random.randint(0,99)
+
+    prompt_message2 = "explain " + config.words[index] + " in a fun and weird but short way without mentioning the word" + config.words[index] + " Do not explicitly mention words related to " + config.words[index]
 
     response2 = openai.Completion.create(
     engine="text-davinci-003",
@@ -66,7 +74,8 @@ def randomize_word(update_obj, context):
     stop=['"""'])
     
     # send the question
-    update_obj.message.reply_text(f'''{response2["choices"][0]["text"]} \n Recorded answer: {context.user_data['answer']}''')
+    # update_obj.message.reply_text(f'''{response2["choices"][0]["text"]} \n Recorded answer: {config.words[index]}''')
+    update_obj.message.reply_text(f'''{response2["choices"][0]["text"]} \n''')    
 
 # in the WELCOME state, check if the user wants to answer a question
 def welcome(update_obj, context):
