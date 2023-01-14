@@ -31,7 +31,7 @@ def start(update_obj, context):
 
     # populate words array from config file
     try:
-         # send the question, and show the keyboard markup (suggested answers)
+        # send the question, and show the keyboard markup (suggested answers)
         update_obj.message.reply_text("Hello, welcome to McDermott Group's Bot! Choose a mode to start (Define/Play)",
         reply_markup=telegram.ReplyKeyboardMarkup([['Define', 'Play']], one_time_keyboard=True)
         )
@@ -57,11 +57,9 @@ def start(update_obj, context):
 
 # helper function, generates new numbers and sends the question
 def randomize_word(update_obj, context):
-    
-    # generate random number as index
-    index = random.randint(0,99)
-
-    prompt_message2 = "explain " + config.words[index] + " in a fun and weird but short way without mentioning the word" + config.words[index] + " Do not explicitly mention words related to " + config.words[index]
+    print(config.index)
+    print(" " + config.words[config.index])
+    prompt_message2 = "explain " + config.words[config.index] + " in a fun and weird but short way without mentioning the word" + config.words[config.index] + " Do not explicitly mention words related to " + config.words[config.index]
 
     response2 = openai.Completion.create(
     engine="text-davinci-003",
@@ -74,7 +72,6 @@ def randomize_word(update_obj, context):
     stop=['"""'])
     
     # send the question
-    # update_obj.message.reply_text(f'''{response2["choices"][0]["text"]} \n Recorded answer: {config.words[index]}''')
     update_obj.message.reply_text(f'''{response2["choices"][0]["text"]} \n''')    
 
 # in the WELCOME state, check if the user wants to answer a question
@@ -94,7 +91,7 @@ def welcome(update_obj, context):
 def play(update_obj, context):
     # expected solution
     # check if the solution was correct
-    if (context.user_data['answer'] == update_obj.message.text.lower()):
+    if (config.words[config.index] == update_obj.message.text.lower()):
         # correct answer, ask the user if he found tutorial helpful, and go to the CORRECT state
         update_obj.message.reply_text("Correct answer!")
         update_obj.message.reply_text("Play another game?", reply_markup=telegram.ReplyKeyboardMarkup([['Yes', 'No']], one_time_keyboard=True))
